@@ -72,6 +72,67 @@ namespace TallerIS
             BodyStyle = WebMessageBodyStyle.Wrapped,
             UriTemplate = "api/eliminarDepartamento")]
         RespuestaEscritura EliminarDepartamento(int idDepartamento);
+
+
+
+        // CODIGO TATO
+        [OperationContract]
+        [WebInvoke(Method = "POST",
+            BodyStyle = WebMessageBodyStyle.WrappedRequest,
+            RequestFormat = WebMessageFormat.Json,
+            ResponseFormat = WebMessageFormat.Json)]
+        Persona ConsultarPersonaPorId(int id);
+
+        [OperationContract]
+        [WebInvoke(Method = "POST",
+           BodyStyle = WebMessageBodyStyle.WrappedRequest,
+           RequestFormat = WebMessageFormat.Json,
+           ResponseFormat = WebMessageFormat.Json)]
+        ListaPersona ConsultarPersonas();
+
+        [OperationContract]
+        [WebInvoke(Method = "PUT",
+          BodyStyle = WebMessageBodyStyle.WrappedRequest,
+          RequestFormat = WebMessageFormat.Json,
+          ResponseFormat = WebMessageFormat.Json)]
+        Respuesta InsertarPersona(Persona p);
+
+        [OperationContract]
+        [WebInvoke(Method = "DELETE",
+          BodyStyle = WebMessageBodyStyle.WrappedRequest,
+          RequestFormat = WebMessageFormat.Json,
+          ResponseFormat = WebMessageFormat.Json)]
+        Respuesta EliminarPersonaPorId(int id);
+
+        [OperationContract]
+        [WebInvoke(Method = "POST",
+          BodyStyle = WebMessageBodyStyle.WrappedRequest,
+          RequestFormat = WebMessageFormat.Json,
+          ResponseFormat = WebMessageFormat.Json)]
+        Respuesta ActualizarPersonaApellido1PorId(int id, string nuevoApellido1);
+
+        [OperationContract]
+        [WebInvoke(Method = "POST",
+          BodyStyle = WebMessageBodyStyle.WrappedRequest,
+          RequestFormat = WebMessageFormat.Json,
+          ResponseFormat = WebMessageFormat.Json)]
+        ListaProfesor ConsultarProfesores();
+
+        [OperationContract]
+        [WebInvoke(Method = "POST",
+          BodyStyle = WebMessageBodyStyle.WrappedRequest,
+          RequestFormat = WebMessageFormat.Json,
+          ResponseFormat = WebMessageFormat.Json)]
+        Respuesta ActualizarNombreProfesoresEstadistica(string nombre);
+
+        /*
+        [OperationContract]
+        [WebInvoke(Method = "POST",
+          BodyStyle = WebMessageBodyStyle.WrappedRequest,
+          RequestFormat = WebMessageFormat.Json,
+          ResponseFormat = WebMessageFormat.Json)]
+        Respuesta InsertarAsignatura(asig);
+        */
     }
 
 
@@ -100,6 +161,8 @@ namespace TallerIS
     [DataContract]
     public abstract class Entidad { }
 
+    /*
+     * TATO : QUITE TU CLASE PERSONA, LE FALTABAN ATRIBUTOS
     [DataContract]
     public class Persona : Entidad {
         string nombre;
@@ -135,6 +198,7 @@ namespace TallerIS
             set { fechaNac = value; }
         }
     }
+    */
 
     [DataContract]
     public class Departamento : Entidad
@@ -326,6 +390,90 @@ namespace TallerIS
         {
             get { return afectados; }
             set { afectados = value; }
+        }
+    }
+
+    //TATO
+    [DataContract]
+    public class Respuesta {
+        [DataMember]
+        public string mensaje { get; set; }
+        [DataMember]
+        public string status { get; set; }
+        [DataMember]
+        public Object objeto { get; set; }
+
+        public Respuesta() { }
+
+        public Respuesta(string m, string s, Object o) {
+            this.mensaje = m;
+            this.status = s;
+            this.objeto = o;
+        }
+
+    }
+
+    [DataContract]
+    public class Persona {
+
+
+        /* Ejemplo un parametro
+         int idPersona1;
+         [DataMember]
+         public int IdPersona2 {
+            get { return idPersona1; }
+            set { idPersona1 = vale; }
+         }
+         */
+        int idPersona;
+        string nif;
+        string nombre;
+        string apellido1;
+        string apellido2;
+        string direccion;
+        string telefono;
+        string fecha_nacimiento;
+        int idGenero;
+        int idTipoPersona;
+
+        [DataMember]
+        public int IdPersona { get { return idPersona; } set { idPersona = value; } }
+        [DataMember]
+        public string Nif { get { return nif; } set { nif = value; } }
+        [DataMember]
+        public string Nombre { get { return nombre; } set { nombre = value; } }
+        [DataMember]
+        public string Apellido1 { get { return apellido1; } set { apellido1 = value; } }
+        [DataMember]
+        public string Apellido2 { get { return apellido2; } set { apellido2 = value; } }
+        [DataMember]
+        public string Direccion { get { return direccion; } set { direccion = value; } }
+        [DataMember]
+        public string Telefono { get { return telefono; } set { telefono = value; } }
+        [DataMember]
+        public string Fecha_nacimiento { get { return fecha_nacimiento; } set { fecha_nacimiento = value; } }
+        [DataMember]
+        public int IdGenero { get { return idGenero; } set { idGenero = value; } }
+        [DataMember]
+        public int IdTipoPersona { get { return idTipoPersona; } set { idTipoPersona = value; } }
+    }
+
+    [DataContract]
+    public class ListaPersona {
+        List<Persona> lista;
+
+        [DataMember]
+        public List<Persona> Lista {
+            get { return lista; }
+            set { lista = value; }
+        }
+
+        public ListaPersona() {
+            lista = new List<Persona>();
+        }
+
+        public void agregarPersona(Persona persona) {
+            lista.Add(persona);
         }
     }
 }
