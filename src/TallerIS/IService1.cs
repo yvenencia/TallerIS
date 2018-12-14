@@ -65,6 +65,15 @@ namespace TallerIS
             UriTemplate = "api/modificarDepartamento")]
         RespuestaEscritura ModificarDepartamento(int idDepartamento, string nuevo);
 
+
+        [OperationContract]
+        [WebInvoke(Method = "POST", BodyStyle = WebMessageBodyStyle.Wrapped, RequestFormat = WebMessageFormat.Json, ResponseFormat = WebMessageFormat.Json)]
+        string modificarGrupo7(int value, int value2);
+
+        [OperationContract]
+        [WebInvoke(Method = "POST", BodyStyle = WebMessageBodyStyle.Wrapped, RequestFormat = WebMessageFormat.Json, ResponseFormat = WebMessageFormat.Json)]
+        string modificarGrupo7(int value, int value2);
+
         [OperationContract]
         [WebInvoke(Method = "DELETE",
             RequestFormat = WebMessageFormat.Json,

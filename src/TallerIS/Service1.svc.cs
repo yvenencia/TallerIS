@@ -260,6 +260,46 @@ namespace TallerIS
             return respuesta;
         }
 
+        public string modificarGrupo7(int value)
+        {
+            string la = "";
+            MySqlCommand cmd = conn.CreateCommand();
+            cmd.CommandText = "UPDATE persona p " +
+                "JOIN profesor f " +
+                "ON p.idPersona = f.idPersona " +
+                "JOIN asignatura a " +
+                "ON a.idProfesor = f.idProfesor " +
+                "set p.nombre = 'Diego' " +
+                "where a.idAsignatura = 2";
+            dr = cmd.ExecuteReader();
+            while (dr.Read())
+            {
+                la = la + dr["idPersona"] + "  " + dr["nombre"] + " - ";
+            }
+            dr.Close();
+            return la;
+        }
+
+        public string modificarGrupo7(int value)
+        {
+            string la = "";
+            MySqlCommand cmd = conn.CreateCommand();
+            cmd.CommandText = "UPDATE persona p " +
+                "JOIN profesor f " +
+                "ON p.idPersona = f.idPersona " +
+                "JOIN asignatura a " +
+                "ON a.idProfesor = f.idProfesor " +
+                "set p.nombre = 'Diego' " +
+                "where a.idAsignatura = 2";
+            dr = cmd.ExecuteReader();
+            while (dr.Read())
+            {
+                la = la + dr["idPersona"] + "  " + dr["nombre"] + " - ";
+            }
+            dr.Close();
+            return la;
+        }
+
         public RespuestaEscritura EliminarDepartamento(int idDepartamento)
         {
             RespuestaEscritura respuesta = new RespuestaEscritura();
