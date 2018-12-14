@@ -6,76 +6,115 @@ using System.ServiceModel;
 using System.ServiceModel.Web;
 using System.Text;
 
-namespace TallerIS
+namespace WcfService1
 {
-    // NOTE: You can use the "Rename" command on the "Refactor" menu to change the interface name "IService1" in both code and config file together.
+    // NOTA: puede usar el comando "Rename" del menú "Refactorizar" para cambiar el nombre de interfaz "IService1" en el código y en el archivo de configuración a la vez.
     [ServiceContract]
     public interface IService1
     {
 
+        //  AQUI EMPIEZA EL CODIGO DE ANDREA - ALBA - MIGUE
         [OperationContract]
-        [WebInvoke(Method = "POST",
-            RequestFormat = WebMessageFormat.Json,
-            ResponseFormat = WebMessageFormat.Json,
-            BodyStyle = WebMessageBodyStyle.Wrapped,
-            UriTemplate = "api/getData")]
+        [WebInvoke(Method = "GET",
+            ResponseFormat = WebMessageFormat.Json)]
         string GetData(int value);
-
+        
         [OperationContract]
-        CompositeType GetDataUsingDataContract(CompositeType composite);
+        [WebInvoke(Method = "GET",
+            ResponseFormat = WebMessageFormat.Json)]
+        int InsertarProfesor(int idProfesor, int idPersona, int idDepartamento);
+     
+        [OperationContract]
+        [WebInvoke(Method = "GET",
+            ResponseFormat = WebMessageFormat.Json,
+            BodyStyle = WebMessageBodyStyle.Wrapped)]
+        int ActualizarProfesor(int idProfesor, int idPersona, int idDepartamento);
 
         [OperationContract]
         [WebInvoke(Method = "GET",
-            RequestFormat = WebMessageFormat.Json,
-            ResponseFormat = WebMessageFormat.Json,
-            BodyStyle = WebMessageBodyStyle.Wrapped,
-            UriTemplate = "api/consultarPersonas")]
-        RespuestaLecturaPersonas ConsultarPersonas();
+            ResponseFormat = WebMessageFormat.Json)]
+        int BorrarProfesor(int idProfesor);
 
         [OperationContract]
         [WebInvoke(Method = "GET",
-            RequestFormat = WebMessageFormat.Json,
-            ResponseFormat = WebMessageFormat.Json,
-            BodyStyle = WebMessageBodyStyle.Wrapped,
-            UriTemplate = "api/consultarProfesores")]
-        RespuestaLecturaProfesores ConsultarProfesores();
+            ResponseFormat = WebMessageFormat.Json)]
+        Profesor GetProfesor(int idProfesor);
 
         [OperationContract]
         [WebInvoke(Method = "GET",
-            RequestFormat = WebMessageFormat.Json,
-            ResponseFormat = WebMessageFormat.Json,
-            BodyStyle = WebMessageBodyStyle.Wrapped,
-            UriTemplate = "api/consultarDepartamentos")]
-        RespuestaLecturaDepartamentos ConsultarDepartamentos();
+            ResponseFormat = WebMessageFormat.Json)]
+        List<Profesor> GetProfesores();
 
         [OperationContract]
-        [WebInvoke(Method = "POST",
-            RequestFormat = WebMessageFormat.Json,
-            ResponseFormat = WebMessageFormat.Json,
-            BodyStyle = WebMessageBodyStyle.Wrapped,
-            UriTemplate = "api/agregarDepartamento")]
-        RespuestaEscritura AgregarDepartamento(String nombre, float creditos, int curso, int cuatrimestre, int idGrado, int idProfesor, int idTipoAsignatura);
-        // TODO: Add your service operations here
-
-        [OperationContract]
-        [WebInvoke(Method = "PUT",
-            RequestFormat = WebMessageFormat.Json,
-            ResponseFormat = WebMessageFormat.Json,
-            BodyStyle = WebMessageBodyStyle.Wrapped,
-            UriTemplate = "api/modificarDepartamento")]
-        RespuestaEscritura ModificarDepartamento(int idDepartamento, string nuevo);
-
-        [OperationContract]
-        [WebInvoke(Method = "DELETE",
-            RequestFormat = WebMessageFormat.Json,
-            ResponseFormat = WebMessageFormat.Json,
-            BodyStyle = WebMessageBodyStyle.Wrapped,
-            UriTemplate = "api/eliminarDepartamento")]
-        RespuestaEscritura EliminarDepartamento(int idDepartamento);
+        [WebInvoke(Method = "GET",
+            ResponseFormat = WebMessageFormat.Json)]
+        Profesor GetProfesorByAsignatura();
+        // TODO: agregue aquí sus operaciones de servicio
     }
 
 
-    // Use a data contract as illustrated in the sample below to add composite types to service operations.
+    // Utilice un contrato de datos, como se ilustra en el ejemplo siguiente, para agregar tipos compuestos a las operaciones de servicio.
+    [DataContract]
+    public class Profesor
+    {
+        int idProfesor;
+        int idPersona;
+        string nombreAsignatura;
+        string nombreProfesor;
+        int idDepartamento;
+
+        [DataMember]
+        public int IdProfesor
+        {
+            get { return this.idProfesor; }
+            set { idProfesor = value; }
+        }
+
+        [DataMember]
+        public string nombreAsig
+        {
+            get { return this.nombreAsignatura; }
+            set { nombreAsignatura = value; }
+        }
+
+        [DataMember]
+        public string NombreProfesor
+        {
+            get { return this.nombreProfesor; }
+            set { nombreProfesor = value; }
+        }
+
+        [DataMember]
+        public int IdPersona
+        {
+            get { return idPersona; }
+            set { idPersona = value; }
+        }
+
+        [DataMember]
+        public int IdDepartamento
+        {
+            get { return idDepartamento; }
+            set { idDepartamento = value; }
+        }
+
+        //  AQUI TERMINA EL CODIGO DE ANDREA - ALBA - MIGUE
+
+
+        //  AQUI EMPIEZA EL CODIGO DE RAFA - ALEX - LUIS
+        /*[OperationContract]
+        [WebInvoke(Method = "GET", ResponseFormat = WebMessageFormat.Json)]
+        string Consulta(string command);
+
+        [OperationContract]
+        [WebInvoke(Method = "GET", ResponseFormat = WebMessageFormat.Json)]
+        string Operar(string command);
+
+        [OperationContract]
+        CompositeType GetDataUsingDataContract(CompositeType composite);
+ 
+    }
+
     [DataContract]
     public class CompositeType
     {
@@ -94,238 +133,11 @@ namespace TallerIS
         {
             get { return stringValue; }
             set { stringValue = value; }
-        }
-    }
-    
-    [DataContract]
-    public abstract class Entidad { }
+        }*/
+        //  AQUI TERMINA EL CODIGO DE RAFA - ALEX - LUIS
 
-    [DataContract]
-    public class Persona : Entidad {
-        string nombre;
-        string apellido;
-        string nif;
-        string fechaNac;
 
-        [DataMember]
-        public string Nombre
-        {
-            get { return nombre; }
-            set { nombre = value; }
-        }
-
-        [DataMember]
-        public string Apellido
-        {
-            get { return apellido; }
-            set { apellido = value; }
-        }
-
-        [DataMember]
-        public string Nif
-        {
-            get { return nif; }
-            set { nif = value; }
-        }
-
-        [DataMember]
-        public string FechaNac
-        {
-            get { return fechaNac; }
-            set { fechaNac = value; }
-        }
-    }
-
-    [DataContract]
-    public class Departamento : Entidad
-    {
-        int id;
-        string nombre;
-
-        [DataMember]
-        public int Id
-        {
-            get { return id; }
-            set { id = value; }
-        }
-
-        [DataMember]
-        public string Nombre
-        {
-            get { return nombre; }
-            set { nombre = value; }
-        }
-    }
-
-    [DataContract]
-    public class Profesores : Entidad
-    {
-        int id;
-        string nombre;
-        string asignatura;
-
-        [DataMember]
-        public int Id
-        {
-            get { return id; }
-            set { id = value; }
-        }
-
-        [DataMember]
-        public string Nombre
-        {
-            get { return nombre; }
-            set { nombre = value; }
-        }
-
-        [DataMember]
-        public string Asignatura
-        {
-            get { return asignatura; }
-            set { asignatura = value; }
-        }
-    }
-
-    [DataContract]
-    public class ListaPersonas : Entidad {
-        List<Persona> lista;
-
-        public ListaPersonas() {
-            lista = new List<Persona>();
-        }
-        
-        public void AgregarPersona(Persona persona) {
-            this.lista.Add(persona);
-        }
-
-        [DataMember]
-        public List<Persona> Lista
-        {
-            get { return lista; }
-            set { lista = value; }
-        }
 
     }
 
-    [DataContract]
-    public class ListaDepartamentos : Entidad
-    {
-        List<Departamento> lista;
-
-        public ListaDepartamentos()
-        {
-            lista = new List<Departamento>();
-        }
-
-        public void AgregarDepartamento(Departamento departamento)
-        {
-            this.lista.Add(departamento);
-        }
-
-        [DataMember]
-        public List<Departamento> Lista
-        {
-            get { return lista; }
-            set { lista = value; }
-        }
-
-    }
-
-    [DataContract]
-    public abstract class RespuestaGenerica{
-        int status;
-        string mensaje;
-
-        [DataMember]
-        public int Status
-        {
-            get { return status; }
-            set { status = value; }
-        }
-
-        [DataMember]
-        public string Mensaje
-        {
-            get { return mensaje; }
-            set { mensaje = value; }
-        }
-    }
-
-    [DataContract]
-    public class RespuestaLecturaPersonas : RespuestaGenerica {
-
-        ListaPersonas listado;
-
-        [DataMember]
-        public ListaPersonas Listado
-        {
-            get { return listado; }
-            set { listado = value; }
-        }
-    }
-
-    [DataContract]
-    public class RespuestaLecturaDepartamentos : RespuestaGenerica
-    {
-
-        ListaDepartamentos listado;
-
-        [DataMember]
-        public ListaDepartamentos Listado
-        {
-            get { return listado; }
-            set { listado = value; }
-        }
-    }
-
-    [DataContract]
-    public class ListaProfesores : Entidad
-    {
-        List<Profesores> lista;
-
-        public ListaProfesores()
-        {
-            lista = new List<Profesores>();
-        }
-
-        public void AgregarProfesor(Profesores profesor)
-        {
-            this.lista.Add(profesor);
-        }
-
-        [DataMember]
-        public List<Profesores> Lista
-        {
-            get { return lista; }
-            set { lista = value; }
-        }
-
-    }
-
-    [DataContract]
-    public class RespuestaLecturaProfesores : RespuestaGenerica
-    {
-
-        ListaProfesores listado;
-
-        [DataMember]
-        public ListaProfesores Listado
-        {
-            get { return listado; }
-            set { listado = value; }
-        }
-    }
-
-    [DataContract]
-    public class RespuestaEscritura : RespuestaGenerica
-    {
-        int afectados;
-
-        [DataMember]
-        public int Afectados
-        {
-            get { return afectados; }
-            set { afectados = value; }
-        }
-    }
 }

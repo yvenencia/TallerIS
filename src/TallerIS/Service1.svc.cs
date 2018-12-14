@@ -1,298 +1,243 @@
 ﻿using MySql.Data.MySqlClient;
+using MySql.Data.Types;
 using System;
 using System.Collections.Generic;
-using System.Configuration;
 using System.Linq;
-using System.Reflection;
 using System.Runtime.Serialization;
 using System.ServiceModel;
 using System.ServiceModel.Web;
 using System.Text;
 
-namespace TallerIS
+namespace WcfService1
 {
-    // NOTE: You can use the "Rename" command on the "Refactor" menu to change the class name "Service1" in code, svc and config file together.
-    // NOTE: In order to launch WCF Test Client for testing this service, please select Service1.svc or Service1.svc.cs at the Solution Explorer and start debugging.
-    // System.Data.SqlClient
+    // NOTA: puede usar el comando "Rename" del menú "Refactorizar" para cambiar el nombre de clase "Service1" en el código, en svc y en el archivo de configuración.
+    // NOTE: para iniciar el Cliente de prueba WCF para probar este servicio, seleccione Service1.svc o Service1.svc.cs en el Explorador de soluciones e inicie la depuración.
     public class Service1 : IService1
     {
-        static readonly log4net.ILog log = 
-            log4net.LogManager.GetLogger(System.Reflection.MethodBase.GetCurrentMethod().DeclaringType);
+        MySqlConnection conn;
+        MySqlCommand comm;
+        MySqlConnectionStringBuilder connStringBuilder;
 
+        private static readonly log4net.ILog log = log4net.LogManager.GetLogger(System.Reflection.MethodBase.GetCurrentMethod().DeclaringType);
+
+        public void ConnectToDb()
+        {
+            connStringBuilder = new MySqlConnectionStringBuilder();
+            connStringBuilder.Server = "127.0.0.1";
+            connStringBuilder.Port = 3306;
+            connStringBuilder.UserID = "root";
+            connStringBuilder.Password = "chiguivombatidonutria2.0";
+            connStringBuilder.Database = "practica1";
+            connStringBuilder.ConnectionTimeout = 30;
+            connStringBuilder.IntegratedSecurity = true;
+            
+            conn = new MySqlConnection(connStringBuilder.ToString());
+            comm = conn.CreateCommand();
+        }
+        
         public string GetData(int value)
         {
             return string.Format("You entered: {0}", value);
         }
-
-        public CompositeType GetDataUsingDataContract(CompositeType composite)
+        
+        public int InsertarProfesor(int idProfesor, int idPersona, int idDepartamento)
         {
-            if (composite == null)
-            {
-                throw new ArgumentNullException("composite");
-            }
-            if (composite.BoolValue)
-            {
-                composite.StringValue += "Suffix";
-            }
-            return composite;
-        }
-
-        public RespuestaLecturaPersonas ConsultarPersonas()
-        {
-            RespuestaLecturaPersonas respuesta = new RespuestaLecturaPersonas();
-            MySqlConnection conector =  null;
-            ListaPersonas lista = null;
             try
             {
-                log.Debug("Entrando al metodo: "+ MethodBase.GetCurrentMethod().Name);
-                conector = new MySqlConnection(ConfigurationManager.ConnectionStrings["MySqlConnectionString"].ConnectionString);
-                conector.Open();
-                MySqlCommand comandoSql = conector.CreateCommand();
-                comandoSql.CommandText = string.Format("SELECT nombre, apellido1, nif, fecha_nacimiento FROM persona;");
-                MySqlDataReader lectorTablaSQL = comandoSql.ExecuteReader();
-                lista = new ListaPersonas();
-                Persona persona = null;
-                while (lectorTablaSQL.Read())
-                {
-                    persona = new Persona();
-                    persona.Nombre = lectorTablaSQL.GetString(0);
-                    persona.Apellido = lectorTablaSQL.GetString(1);
-                    persona.Nif = lectorTablaSQL.GetString(2);
-                    persona.FechaNac = lectorTablaSQL.GetString(3);
-                    lista.AgregarPersona(persona);
-                }
-                respuesta.Status = 200;
-                respuesta.Mensaje = "Lectura exitosa";
-                respuesta.Listado=lista;                  
+                ConnectToDb();
+                comm.CommandText = "INSERT INTO profesor VALUES (@idProfesor, @idPersona, @idDepartamento);";
+                comm.Parameters.AddWithValue("idProfesor", idProfesor);
+                comm.Parameters.AddWithValue("idPersona", idPersona);
+                comm.Parameters.AddWithValue("idDepartamento", idDepartamento);
+
+                comm.CommandType = System.Data.CommandType.Text;
+                conn.Open();
+                log.Info("El profesor fue insertado exitosamente");
+                return comm.ExecuteNonQuery();
             }
-            catch (Exception e)
+            catch (Exception)
             {
-                log.Error("Error en la conexion a base de datos", e);
-                respuesta.Status = 500;
-                respuesta.Mensaje = "Error de conexion a la base de datos";
-                respuesta.Listado = null;
-                return respuesta;
+                throw;
             }
             finally
             {
-                if (conector != null) {
-                    conector.Close();
-                    conector.Dispose();
+                if (conn != null)
+                {
+                    conn.Close();
                 }
             }
-            log.Debug("Saliendo del metodo: " + MethodBase.GetCurrentMethod().Name);
-            return respuesta;
         }
 
-        public RespuestaLecturaDepartamentos ConsultarDepartamentos()
+        public int BorrarProfesor(int idProfesor)
         {
-            RespuestaLecturaDepartamentos respuesta = new RespuestaLecturaDepartamentos();
-            MySqlConnection conector = null;
-            ListaDepartamentos lista = null;
             try
             {
-                log.Debug("Entrando al metodo: " + MethodBase.GetCurrentMethod().Name);
-                conector = new MySqlConnection(ConfigurationManager.ConnectionStrings["MySqlConnectionString"].ConnectionString);
-                conector.Open();
-                MySqlCommand comandoSql = conector.CreateCommand();
-                comandoSql.CommandText = string.Format("SELECT * FROM departamento;");
-                MySqlDataReader lectorTablaSQL = comandoSql.ExecuteReader();
-                lista = new ListaDepartamentos();
-                Departamento departamento = null;
-                while (lectorTablaSQL.Read())
-                {
-                    departamento = new Departamento();
-                    departamento.Id = Convert.ToInt32(lectorTablaSQL.GetString(0));
-                    departamento.Nombre = lectorTablaSQL.GetString(1);
-                    lista.AgregarDepartamento(departamento);
-                }
-                respuesta.Status = 200;
-                respuesta.Mensaje = "Lectura exitosa";
-                respuesta.Listado = lista;
+                ConnectToDb();
+                comm.CommandText = "DELETE from profesor WHERE idProfesor=@idProfesor;";
+                comm.Parameters.AddWithValue("idProfesor", idProfesor);
+                comm.CommandType = System.Data.CommandType.Text;
+                conn.Open();
+
+                log.Info("El profesor fue borrado exitosamente");
+                return comm.ExecuteNonQuery();
             }
-            catch (Exception e)
+            catch (Exception)
             {
-                log.Error("Error en la conexion a base de datos", e);
-                respuesta.Status = 500;
-                respuesta.Mensaje = "Error de conexion a la base de datos";
-                respuesta.Listado = null;
-                return respuesta;
+                throw;
             }
             finally
             {
-                if (conector != null)
+                if (conn != null)
                 {
-                    conector.Close();
-                    conector.Dispose();
+                    conn.Close();
                 }
             }
-            log.Debug("Saliendo del metodo: " + MethodBase.GetCurrentMethod().Name);
-            return respuesta;
         }
 
-        public RespuestaEscritura AgregarDepartamento(String nombre, float creditos, int curso, int cuatrimestre, int idGrado, int idProfesor, int idTipoAsignatura)
+        public int ActualizarProfesor(int idProfesor, int idPersona, int idDepartamento)
         {
-            RespuestaEscritura respuesta = new RespuestaEscritura();
-            MySqlConnection conector = null;
             try
             {
-                log.Debug("Entrando al metodo: " + MethodBase.GetCurrentMethod().Name);
-                conector = new MySqlConnection(ConfigurationManager.ConnectionStrings["MySqlConnectionString"].ConnectionString);
-                conector.Open();
-                MySqlCommand comandoSql = conector.CreateCommand();
-                comandoSql.CommandText = string.Format("INSERT INTO asignatura (nombre, creditos, curso, cuatrimestre, idGrado, idProfesor, idTipoAsignatura) VALUES (@0, @1, @2, @3, @4, @5, @6);");
-                comandoSql.Parameters.Add(new MySqlParameter("0", nombre ));
-                comandoSql.Parameters.Add(new MySqlParameter("1", creditos));
-                comandoSql.Parameters.Add(new MySqlParameter("2", curso));
-                comandoSql.Parameters.Add(new MySqlParameter("3", cuatrimestre));
-                comandoSql.Parameters.Add(new MySqlParameter("4", idGrado));
-                comandoSql.Parameters.Add(new MySqlParameter("5", idProfesor));
-                comandoSql.Parameters.Add(new MySqlParameter("6", idTipoAsignatura));
-              
-                var verificador = comandoSql.ExecuteNonQuery();
-                respuesta.Status = 200;
-                respuesta.Afectados = verificador;
-                respuesta.Mensaje = "Insert a la base de datos exitoso!";
+                ConnectToDb();
+                comm.CommandText = "UPDATE profesor SET idPersona=@idPersona, idDepartamento=@idDepartamento WHERE idProfesor=@idProfesor;";
+                comm.Parameters.AddWithValue("idPersona", idPersona);
+                comm.Parameters.AddWithValue("idDepartamento", idDepartamento);
+                comm.Parameters.AddWithValue("idProfesor", idProfesor);
+               
+                comm.CommandType = System.Data.CommandType.Text;
+                conn.Open();
+
+                log.Info("Los datos del profesor fueron actualizados exitosamente");
+                return comm.ExecuteNonQuery();
             }
-            catch (Exception e)
+            catch (Exception)
             {
-                log.Error("Error en la conexion a base de datos", e);
-                respuesta.Status = 500;
-                respuesta.Mensaje = "Error en la conexion a base de datos";
+                throw;
             }
             finally
             {
-                if (conector != null)
+                if (conn != null)
                 {
-                    conector.Close();
-                    conector.Dispose();
+                    conn.Close();
                 }
             }
-            log.Debug("Saliendo del metodo: " + MethodBase.GetCurrentMethod().Name);
-            return respuesta;
         }
 
-        public RespuestaLecturaProfesores ConsultarProfesores()
+        public List<Profesor> GetProfesores()
         {
-            RespuestaLecturaProfesores respuesta = new RespuestaLecturaProfesores();
-            MySqlConnection conector = null;
-            Profesores profesor;
-            ListaProfesores lista;
+            List<Profesor> profesores = new List<Profesor>();
             try
             {
-                log.Debug("Entrando al metodo: " + MethodBase.GetCurrentMethod().Name);
-                conector = new MySqlConnection(ConfigurationManager.ConnectionStrings["MySqlConnectionString"].ConnectionString);
-                conector.Open();
-                MySqlCommand comandoSql = conector.CreateCommand();
-                comandoSql.CommandText = string.Format("SELECT A.idPersona, A.nombre, B.nombre FROM persona as A join profesor as C on A.idPersona = C.idPersona join asignatura as B on B.idProfesor = C.idProfesor;");
-                var verificador = comandoSql.ExecuteNonQuery();
-                MySqlDataReader lectorTablaSQL = comandoSql.ExecuteReader();
-                lista = new ListaProfesores();
-                Departamento departamento = null;
-                while (lectorTablaSQL.Read())
+                ConnectToDb();
+                comm.CommandText = "SELECT idProfesor, idPersona, idDepartamento FROM profesor";
+                comm.CommandType = System.Data.CommandType.Text;
+
+                conn.Open();
+
+                MySqlDataReader reader = comm.ExecuteReader();
+
+                while (reader.Read())
                 {
-                    profesor = new Profesores();
-                    profesor.Id = Convert.ToInt32(lectorTablaSQL.GetString(0));
-                    profesor.Nombre = lectorTablaSQL.GetString(1);
-                    profesor.Asignatura = lectorTablaSQL.GetString(2);
-                    lista.AgregarProfesor(profesor);
+                    Profesor profesor = new Profesor();
+                    profesor.IdProfesor = Convert.ToInt32(reader[0]);
+                    profesor.IdProfesor = Convert.ToInt32(reader[1]);
+                    profesor.IdDepartamento = Convert.ToInt32(reader[2]);
+                    profesores.Add(profesor);
                 }
-                respuesta.Mensaje = "Lectura exitosa";
-                respuesta.Listado = lista;
-                respuesta.Status = 200;
-                //respuesta.Afectados = verificador;
+
+                log.Info("La consulta de los profesores fue realizada exitosamente");
+                return profesores;
             }
-            catch (Exception e)
+            catch (Exception)
             {
-                log.Error("Error en la conexion a base de datos", e);
-                respuesta.Status = 500;
-                respuesta.Mensaje = "Error en la conexion a base de datos";
+                throw;
             }
             finally
             {
-                if (conector != null)
+                if (conn != null)
                 {
-                    conector.Close();
-                    conector.Dispose();
+                    conn.Close();
                 }
             }
-            log.Debug("Saliendo del metodo: " + MethodBase.GetCurrentMethod().Name);
-            return respuesta;
         }
 
-        public RespuestaEscritura ModificarDepartamento(int idDepartamento, string nuevo)
+        public Profesor GetProfesor(int idProfesor)
         {
-            RespuestaEscritura respuesta = new RespuestaEscritura();
-            MySqlConnection conector = null;
+            Profesor profesor = new Profesor();
             try
             {
-                log.Debug("Entrando al metodo: " + MethodBase.GetCurrentMethod().Name);
-                conector = new MySqlConnection(ConfigurationManager.ConnectionStrings["MySqlConnectionString"].ConnectionString);
-                conector.Open();
-                MySqlCommand comandoSql = conector.CreateCommand();
-                comandoSql.CommandText = string.Format("UPDATE departamento SET nombre = @0 WHERE idDepartamento = @1;");
-                comandoSql.Parameters.Add(new MySqlParameter("0", nuevo));
-                comandoSql.Parameters.Add(new MySqlParameter("1", idDepartamento));
-                int verificador = comandoSql.ExecuteNonQuery();
-                respuesta.Status = 200;
-                respuesta.Afectados = verificador;
-                if (verificador != 0){
-                    respuesta.Mensaje = "Modificacion a la base de datos exitosa!";
-                }else{
-                    respuesta.Mensaje = "Departamento inexitente";
+                ConnectToDb();
+                comm.CommandText = "SELECT idPersona, idDepartamento FROM profesor WHERE idProfesor=@idProfesor";
+                comm.Parameters.AddWithValue("idProfesor", idProfesor);
+                profesor.IdProfesor = idProfesor;
+                comm.CommandType = System.Data.CommandType.Text;
+                
+                conn.Open();
+
+                MySqlDataReader reader = comm.ExecuteReader();
+
+                while (reader.Read())
+                {
+                    profesor.IdPersona = Convert.ToInt32(reader[0]);
+                    profesor.IdDepartamento = Convert.ToInt32(reader[1]);
                 }
+
+                log.Info("La consulta del profesor fue realizada exitosamente");
+                return profesor;
             }
-            catch (Exception e)
+            catch (Exception)
             {
-                log.Error("Error en la conexion a base de datos", e);
-                respuesta.Status = 500;
-                respuesta.Mensaje = "Error en la conexion a base de datos";
+                throw;
             }
             finally
             {
-                if (conector != null)
+                if (conn != null)
                 {
-                    conector.Close();
-                    conector.Dispose();
+                    conn.Close();
                 }
-            }
-            log.Debug("Saliendo del metodo: " + MethodBase.GetCurrentMethod().Name);
-            return respuesta;
-        }
 
-        public RespuestaEscritura EliminarDepartamento(int idDepartamento)
+            }
+
+        }
+        
+        public Profesor GetProfesorByAsignatura()
         {
-            RespuestaEscritura respuesta = new RespuestaEscritura();
-            MySqlConnection conector = null;
             try
             {
-                log.Debug("Entrando al metodo: " + MethodBase.GetCurrentMethod().Name);
-                conector = new MySqlConnection(ConfigurationManager.ConnectionStrings["MySqlConnectionString"].ConnectionString);
-                conector.Open();
-                MySqlCommand comandoSql = conector.CreateCommand();
-                comandoSql.CommandText = string.Format("DELETE FROM departamento WHERE idDepartamento = @0;");
-                comandoSql.Parameters.Add(new MySqlParameter("0", idDepartamento));
-                int verificador = comandoSql.ExecuteNonQuery();
-                respuesta.Status = 200;
-                respuesta.Afectados = verificador;
-                respuesta.Mensaje = "Delete a la base de datos exitoso!";
+                Profesor profesor = new Profesor();
+                ConnectToDb();
+                comm.CommandText = "SELECT A.idPersona, A.nombre, B.idDepartamento, C.nombre, B.idProfesor FROM persona A join profesor B on A.idPersona = B.idPersona join asignatura C on B.idProfesor = C.idProfesor WHERE C.nombre = 'Calculo'";
+                comm.CommandType = System.Data.CommandType.Text;
+
+                conn.Open();
+
+                MySqlDataReader reader = comm.ExecuteReader();
+
+                while (reader.Read())
+                {
+                    profesor.IdPersona = Convert.ToInt32(reader[0]);
+                    profesor.NombreProfesor = Convert.ToString(reader[1]);
+                    profesor.IdDepartamento = Convert.ToInt32(reader[2]);
+                    profesor.nombreAsig = Convert.ToString(reader[3]);
+                    profesor.IdProfesor = Convert.ToInt32(reader[4]);
+                }
+
+                log.Info("La consulta del profesor por asignatura fue realizada exitosamente");
+                return profesor;
             }
-            catch (Exception e)
+            catch (Exception)
             {
-                log.Error("Error en la conexion a base de datos", e);
-                respuesta.Status = 500;
-                respuesta.Mensaje = "Error en la conexion a base de datos";
+                throw;
             }
             finally
             {
-                if (conector != null)
+                if (conn != null)
                 {
-                    conector.Close();
-                    conector.Dispose();
+                    conn.Close();
                 }
+
             }
-            log.Debug("Saliendo del metodo: " + MethodBase.GetCurrentMethod().Name);
-            return respuesta;
-        }
+        } 
     }
+
 }
